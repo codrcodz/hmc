@@ -1,0 +1,12 @@
+---
+cons3rtcli_vars:
+  virtualenvs:
+    - virtualenv_python: "python2.7"
+      package_name: "pycons3rtapi"
+      package_version: "latest"
+  users:
+    - name: "ccochran"
+      virtualenv_path: "/home/ccochran/venvs/cons3rtcli"
+    - name: "test"
+      virtualenv_path: "/home/test/venvs/cons3rtcli"
+...

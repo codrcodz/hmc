@@ -1,0 +1,51 @@
+---
+# tasks file for ansible-role-cons3rtcli
+#
+
+- name: ensure cons3rt group exists
+  group:
+    name: "cons3rt"
+    state: "present"
+
+- name: ensure global cons3rt directory exists, is owned by cons3rt group, and gid bit is set
+  file:
+    state: "directory"
+    path: "/etc/pycons3rt/conf"
+    owner: "root"
+    group: "cons3rt"
+    mode: "1770"
+
+- name: ensure cons3rt users are members of cons3rt group
+  user:
+    name: "{{ item.name }}"
+    state: "present"
+    groups: "cons3rt"
+    append: true
+  register: task_manage_cons3rtcli_users
+  loop: "{{ query('items', cons3rtcli_vars.users) }}"
+
+- name: ensure cons3rt virtualenv directories exist, and are accessible only by the user
+  file:
+    state: "directory"
+    path: "{{ item.virtualenv_path }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0700
+  loop: "{{ query('items', cons3rtcli_vars.users) }}"
+
+- name: ensure cons3rt virtualenvs are installed and up-to-date with required pip packages
+  pip:
+    name: "{{ item[0].package_name }}"
+    extra_args: "--no-cache-dir"
+    version: "{{ item[0].package_version|default('latest') }}"
+    virtualenv: "{{ item[1].virtualenv_path }}"
+    virtualenv_python: "{{ item[0].virtualenv_python }}"
+  become: true
+  become_user: "{{ item[1].name }}"
+  become_method: "sudo"
+  loop: "{{ query('nested', cons3rtcli_vars.virtualenvs, cons3rtcli_vars.users, {'skip_missing': true}) }}"
+
+- name: display user instructions for activating virtualenv containing cons3rt cli
+  debug:
+    msg: "[INFO] After ansible run is complete, 'su' to one of the cons3rt users, 'cd' to the virtualenv directory, and run 'source ./bin/activate' to start using cons3rt."
+  changed_when: false
