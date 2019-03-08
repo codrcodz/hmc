@@ -9,5 +9,6 @@
     ansible_python_interpreter: "/usr/bin/python2.7"
 
   roles:
+    - ansible-role-pki
     - ansible-role-cons3rt-cli 
 

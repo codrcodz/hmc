@@ -1,0 +1,8 @@
+---
+# defaults file for ansible-role-pki
+#
+pki:
+  packages:
+    - opensc
+    - pcsc-tools
+    - libccid
